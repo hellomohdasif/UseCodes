@@ -1,0 +1,72 @@
+// 404 code
+
+<?php
+
+header("HTTP/1.1 301 Moved Permanently");
+
+header("Location: ".get_bloginfo('url'));
+
+exit();
+
+?>
+
+// Wordpress cron
+
+define('DISABLE_WP_CRON', true);
+
+wget -q -O - https://tassco.org/wp-cron.php?doing_wp_cron >/dev/null 2>&1	
+
+// ContenetCrawler Regex
+
+<p>Also Read – <a href="https://hubsadda.com/5-ways-to-drive-organic-traffic-to-your-website/" target="_blank" rel="noreferrer noopener">5 Ways to Drive Organic Traffic to Your Website</a></p>
+
+<p>Also Read(.*)p>
+
+ 
+// delete all post attachment from wordpress
+
+
+1) 
+DELETE FROM wp_postmeta
+WHERE post_id IN
+(
+SELECT id
+FROM wp_posts
+WHERE post_type = 'attachment'
+)
+;
+ 
+2)  DELETE FROM wp_posts WHERE post_type = 'attachment'
+
+//custom-code-START
+namespace WPCCrawler;
+if(!class_exists('WPTSLMClient')) {
+class WPTSLMClient {
+public function __construct($productName, $productId, $type, $apiUrl, $pluginFilePath, $textDomain){}
+public function setUrlHowToFindLicenseKey($url){}
+public function isUserCool() {return true;}
+public function setIsProductPageCallback($callback){}
+}
+}
+//custom-code-END
+
+add_filter( 'use_widgets_block_editor', '__return_false' );
+
+
+add_filter('wp_feed_cache_transient_lifetime', create_function('', 'return 300;'));
+
+
+
+#########################################################################################################
+
+I think I figured it out. You try to remove the same element more than once. When you do so, the plugin tries to remove an already removed element, which causes this problem. You can change wpcontent/plugins/wpcontent-crawler/app/Objects/Crawling/Bot/AbstractBot.php’s line 808 from this:
+
+$child->parentNode->removeChild($child);
+to this:
+
+if ($child->parentNode !== null) {
+    $child->parentNode->removeChild($child);
+}
+I will make this change in the next version as well.
+
+#########################################################################################################
